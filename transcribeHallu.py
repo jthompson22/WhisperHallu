@@ -201,21 +201,21 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
     
     if(useDemucs):
         startTime = time.time()
-        #try:
-        #demucsDir=pathIn+".demucs"
-        #if(not os.path.exists(demucsDir)):
-        #    os.mkdir(demucsDir)
-        pathDemucs=pathIn+".vocals.wav" #demucsDir+"/htdemucs/"+os.path.splitext(os.path.basename(pathIn))[0]+"/vocals.wav"
-        #Demucs seems complex, using CLI cmd for now
-        #aCmd = "python -m demucs --two-stems=vocals -d "+device+":"+cudaIdx+" --out "+demucsDir+" "+pathIn
-        #print("CMD: "+aCmd)
-        #os.system(aCmd)
-        demucs_audio(pathIn=pathIn,model=modelDemucs,device="cpu"+cudaIdx,pathVocals=pathDemucs,pathOther=pathIn+".other.wav")
-        print("T=",(time.time()-startTime))
-        print("PATH="+pathDemucs,flush=True)
-        pathNoCut = pathIn = pathDemucs
-        #except:
-        #     print("Warning: can't split vocals")
+        try:
+            demucsDir=pathIn+".demucs"
+            if(not os.path.exists(demucsDir)):
+            os.mkdir(demucsDir)
+            pathDemucs=pathIn+".vocals.wav" #demucsDir+"/htdemucs/"+os.path.splitext(os.path.basename(pathIn))[0]+"/vocals.wav"
+            #Demucs seems complex, using CLI cmd for now
+            aCmd = "python -m demucs --two-stems=vocals -d cpu --out "+demucsDir+" "+pathIn
+            print("CMD: "+aCmd)
+            os.system(aCmd)
+            demucs_audio(pathIn=pathIn,model=modelDemucs,device="cpu",pathVocals=pathDemucs,pathOther=pathIn+".other.wav")
+            print("T=",(time.time()-startTime))
+            print("PATH="+pathDemucs,flush=True)
+            pathNoCut = pathIn = pathDemucs
+        except:
+            print("Warning: can't split vocals")
 
     duration = -1
     startTime = time.time()

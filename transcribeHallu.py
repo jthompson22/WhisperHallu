@@ -204,7 +204,7 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
         try:
             demucsDir=pathIn+".demucs"
             if(not os.path.exists(demucsDir)):
-            os.mkdir(demucsDir)
+                os.mkdir(demucsDir)
             pathDemucs=pathIn+".vocals.wav" #demucsDir+"/htdemucs/"+os.path.splitext(os.path.basename(pathIn))[0]+"/vocals.wav"
             #Demucs seems complex, using CLI cmd for now
             aCmd = "python -m demucs --two-stems=vocals -d cpu --out "+demucsDir+" "+pathIn

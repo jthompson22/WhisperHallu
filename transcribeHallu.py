@@ -48,16 +48,6 @@ if(useDemucs):
 
 useCompressor=True
 
-try:
-    #Standard Whisper: https://github.com/openai/whisper
-    import openai
-    print("Using OPEN AI ENDPOINT")
-    whisperFound = "STD"
-    from pathlib import Path
-    from whisper.utils import WriteSRT
-except ImportError as e:
-    pass
-
 beam_size=2
 model = None
 device = "cuda" #cuda / cpu
@@ -110,42 +100,20 @@ def formatTimeStamp(aT=0):
     aS = (aT%60)
     return "%02d:%02d:%06.3f" % (aH,aM,aS)
 
-def getPrompt(lng:str):
-    if(lng == "en"):
-        aOk=""
-        return "Whisper, Ok. "\
-            +"A pertinent sentence for your purpose in your language. "\
-            +"Ok, Whisper. Whisper, Ok. Ok, Whisper. Whisper, Ok. "\
-            +"Please find here, an unlikely ordinary sentence. "\
-            +"This is to avoid a repetition to be deleted. "\
-            +"Ok, Whisper. "
-    
-    if(lng == "fr"):
-        return "Whisper, Ok. "\
-            +"Une phrase pertinente pour votre propos dans votre langue. "\
-            +"Ok, Whisper. Whisper, Ok. Ok, Whisper. Whisper, Ok. "\
-            +"Merci de trouver ci-joint, une phrase ordinaire improbable. "\
-            +"Pour éviter une répétition à être supprimée. "\
-            +"Ok, Whisper. "
-    
-    if(lng == "uk"):
-        return "Whisper, Ok. "\
-            +"Доречне речення вашою мовою для вашої мети. "\
-            +"Ok, Whisper. Whisper, Ok. Ok, Whisper. Whisper, Ok. "\
-            +"Будь ласка, знайдіть тут навряд чи звичайне речення. "\
-            +"Це зроблено для того, щоб уникнути повторення, яке потрібно видалити. "\
-            +"Ok, Whisper. "
-    
-    if(lng == "hi"):
-        return "विस्पर, ओके. "\
-            +"आपकी भाषा में आपके उद्देश्य के लिए एक प्रासंगिक वाक्य। "\
-            +"ओके, विस्पर. विस्पर, ओके. ओके, विस्पर. विस्पर, ओके. "\
-            +"कृपया यहां खोजें, एक असंभावित सामान्य वाक्य। "\
-            +"यह हटाए जाने की पुनरावृत्ति से बचने के लिए है। "\
-            +"ओके, विस्पर. "
-    
-    #Not Already defined?
-    return ""
+
+def preProcess(path: str,lng: str, key, lngInput=None,isMusic=False):
+    try:
+        print("Converting To WAV:")
+        pathWAV = pathIn+".WAV"+".wav"
+        aCmd = "ffmpeg -y -i \""+pathIn+"\" "+ " -c:a pcm_s16le -ar "+str(SAMPLING_RATE)+" \""+pathWAV+"\" > \""+pathWAV+".log\" 2>&1"
+        print("CMD: "+aCmd)
+        os.system(aCmd)
+        print("T=",(time.time()-startTime))
+        print("PATH="+pathWAV,flush=True)
+        pathIn = pathClean = pathWAV
+    except:
+         print("Warning: can't convert to WAV")
+
 
 
 def transcribePrompt(path: str,lng: str,prompt=None, key=None, lngInput=None,isMusic=False,addSRT=False):

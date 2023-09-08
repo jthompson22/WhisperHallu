@@ -120,6 +120,7 @@ def demucsPreProcess(path: str, device: str):
 
 def removeSilencePreProcess(path: str):
     try:
+        startTime = time.time()
         pathSILCUT = remove_base(path) +"_slience-loudnorm_"+".wav"
         aCmd = "ffmpeg -y -i \""+path+"\" -af \"silenceremove=start_periods=1:stop_periods=-1:start_threshold=-50dB:stop_threshold=-50dB:start_silence=0.2:stop_silence=0.2, loudnorm\" "+ " -c:a pcm_s16le -ar "+str(SAMPLING_RATE)+" \""+pathSILCUT+"\" > \""+pathSILCUT+".log\" 2>&1"
         print("CMD: "+aCmd)
@@ -134,8 +135,9 @@ def removeSilencePreProcess(path: str):
          sys.exit(-1)
 
 def sileroVADPreProcess(path: str):
-    startTime = time.time()
+   
     try:
+        startTime = time.time()
         pathVAD = remove_base(path) +"_silero_.wav"
         wav = read_audio(path, sampling_rate=SAMPLING_RATE)
         #https://github.com/snakers4/silero-vad/blob/master/utils_vad.py#L161

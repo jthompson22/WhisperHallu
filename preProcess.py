@@ -97,7 +97,6 @@ def wavPreProcess(path: str) -> str:
 
 def demucsPreProcess(path: str, device: str):
     try:
-        pathIn = path
         startTime = time.time()
         pathDemucs=remove_base(path) +"_demucs-vocals_.wav" 
         pathRemoved= "RemovedNoise/"
@@ -163,7 +162,7 @@ def runPreProcessAlgorithim(path: str, device: str, options: dict):
     pathIn = path
 
     pathIn = wavPreProcess(pathIn)
-    # pathIn = demucsPreProcess(pathIn, device)
+    pathIn = demucsPreProcess(pathIn, device)
     # pathIn = removeSilencePreProcess(pathIn)
     # pathIn = sileroVADPreProcess(pathIn)
     #print("FINALPATH= "+ pathIn, flush=True)

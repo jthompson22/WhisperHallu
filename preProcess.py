@@ -82,7 +82,8 @@ def wavPreProcess(path: str) -> str:
         print("PATH=", pathWAV, flush=True)
         return pathWAV
     except Exception as e:
-        print(f"Warning: can't convert to WAV. Error: {e}"))
+        print(f"Warning: can't convert to WAV. Error: {e}")
+        sys.exit(-1)
 
 def demucsPreProcess(path: str, device: str):
     try:
@@ -101,7 +102,8 @@ def demucsPreProcess(path: str, device: str):
         print("PATH= "+pathDemucs,flush=True)
         return pathDemucs
     except:
-        print("Warning: can't split vocals");
+        print("Warning: can't split vocals")
+        sys.exit(-1)
 
 def removeSilencePreProcess(path: str):
     try:
@@ -115,7 +117,8 @@ def removeSilencePreProcess(path: str):
         print("DURATION="+ str(duration))
         return pathSILCUT
     except:
-         print("Unable to remove silences");
+         print("Unable to remove silences")
+         sys.exit(-1)
 
 def sileroVADPreProcess(path: str):
     startTime = time.time()
@@ -130,6 +133,7 @@ def sileroVADPreProcess(path: str):
         return pathVAD
     except:
         print("Warning: can't filter noises")
+        sys.exit(-1)
 
 def useCompressor(path):
     try:

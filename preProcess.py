@@ -163,9 +163,9 @@ def runPreProcessAlgorithim(path: str, device: str, options: dict):
     pathIn = path
 
     pathIn = wavPreProcess(pathIn)
-    pathIn = demucsPreProcess(pathIn, device)
-    pathIn = removeSilencePreProcess(pathIn)
-    pathIn = sileroVADPreProcess(pathIn)
+    # pathIn = demucsPreProcess(pathIn, device)
+    # pathIn = removeSilencePreProcess(pathIn)
+    # pathIn = sileroVADPreProcess(pathIn)
     #print("FINALPATH= "+ pathIn, flush=True)
 
 

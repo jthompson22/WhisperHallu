@@ -29,9 +29,6 @@ def demucs_audio(pathIn: str,
         if audio_dims < 3:
             audio = audio[None]
 
-    if device is None:
-        device = "cpu"
-    print("Demucs using device: "+device)
     result = apply_model(model, audio, device=device, split=True, overlap=.25)
     if device != 'cpu':
         torch.cuda.empty_cache()

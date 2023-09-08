@@ -4,6 +4,7 @@ import time
 import re
 from _io import StringIO
 import openai
+import subprocess
  
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     print("Python >= 3.10")
@@ -68,6 +69,17 @@ def getDuration(aLog:str):
             if(re.match(r"^ *Duration: [0-9][0-9]:[0-9][0-9]:[0-9][0-9][.][0-9][0-9], .*$", line, re.IGNORECASE)):
                 duration = re.sub(r"(^ *Duration: *|[,.].*$)", "", line, 2, re.IGNORECASE)
                 return sum(x * int(t) for x, t in zip([3600, 60, 1], duration.split(":")))
+
+import subprocess
+
+def run_command_and_check(cmd):
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+
+    if process.returncode != 0:
+        raise RuntimeError(f"Command failed with error: {stderr.decode()}")
+
+
 #PROCESSING
 def wavPreProcess(path: str) -> str:
     try:
@@ -77,7 +89,7 @@ def wavPreProcess(path: str) -> str:
         pathWAV = remove_base(pathIn) + "_wav-converted_" + ".wav"
         aCmd = f"ffmpeg -y -i \"{pathIn}\" -c:a pcm_s16le -ar {SAMPLING_RATE} \"{pathWAV}\" > \"{pathWAV}.log\" 2>&1"
         print("CMD:", aCmd)
-        os.system(aCmd)
+        run_command_and_check(aCmd)
         print("Time=", (time.time() - initTime))
         print("PATH=", pathWAV, flush=True)
         return pathWAV
@@ -89,7 +101,7 @@ def demucsPreProcess(path: str, device: str):
     try:
         pathIn = path
         startTime = time.time()
-        pathDemucs=remove_base(path) +"._demucs-vocals_.wav" 
+        pathDemucs=remove_base(path) +"_demucs-vocals_.wav" 
         pathRemoved= "RemovedNoise/"
         if(not os.path.exists("RemovedNoise")):
                 os.mkdir("RemovedNoise")

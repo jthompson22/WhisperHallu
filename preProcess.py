@@ -146,6 +146,6 @@ def runPreProcessAlgorithim(path: str, device: str, options: dict):
     pathIn = demucsPreProcess(pathIn, device)
     pathIn = removeSilencePreProcess(pathIn)
     pathIn = sileroVADPreProcess(pathIn)
-    print("FINALPATH= "+ pathIn,flush=True)
+    #print("FINALPATH= "+ pathIn, flush=True)
 
 

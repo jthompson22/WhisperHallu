@@ -40,7 +40,9 @@ def demucs_audio(pathIn: str,
         print("Source: "+name)
         source_idx=model.sources.index(name)
         source=result[0, source_idx].mean(0)
-        torchaudio.save(pathIn+"."+name+".wav", source[None], model.samplerate)
+        if name == "vocals":
+            torchaudio.save(pathVocals, source[None], model.samplerate)
+        #torchaudio.save(pathIn+"."+name+".wav", source[None], model.samplerate)
         
 
 # load_demucs_model()

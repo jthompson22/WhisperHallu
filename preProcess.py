@@ -98,7 +98,7 @@ def wavPreProcess(path: str) -> str:
 def demucsPreProcess(path: str, device: str):
     try:
         startTime = time.time()
-        pathDemucs=remove_base(path) +"_demucs-vocals_.wav" 
+        pathDemucs=remove_base(path) +"demucs-vocals_.wav" 
         pathRemoved= "RemovedNoise/"
         if(not os.path.exists("RemovedNoise")):
                 os.mkdir("RemovedNoise")

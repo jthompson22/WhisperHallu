@@ -205,6 +205,7 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
     
     if(useDemucs):
         startTime = time.time()
+        global device
         #try:
         #demucsDir=pathIn+".demucs"
         #if(not os.path.exists(demucsDir)):

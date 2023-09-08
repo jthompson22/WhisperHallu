@@ -3,7 +3,6 @@ import os
 import time
 import re
 from _io import StringIO
-import openai
  
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     print("Python >= 3.10")
@@ -31,14 +30,6 @@ if(useSileroVAD):
      VADIterator,
      collect_chunks) = utils
 
-useSpleeter=False
-if(useSpleeter):
-    from spleeter.audio import STFTBackend
-    backend = STFTBackend.LIBROSA
-    from spleeter.separator import Separator
-    print("Using spleeter:2stems-16kHz")
-    separator = Separator('spleeter:2stems-16kHz',stft_backend=backend)
-
 useDemucs=True
 if(useDemucs):
     from demucsWrapper import load_demucs_model
@@ -48,19 +39,10 @@ if(useDemucs):
 
 useCompressor=True
 
-try:
-    #Standard Whisper: https://github.com/openai/whisper
-    import openai
-    print("Using OPEN AI ENDPOINT")
-    whisperFound = "STD"
-    from pathlib import Path
-    from whisper.utils import WriteSRT
-except ImportError as e:
-    pass
 
 beam_size=2
 model = None
-device = "cuda" #cuda / cpu
+device = "cpu" #cuda / cpu
 cudaIdx = 0
 
 SAMPLING_RATE = 16000
@@ -68,83 +50,12 @@ SAMPLING_RATE = 16000
 from threading import Lock, Thread
 lock = Lock()
 
-def loadModel(gpu: str,modelSize=None):
-    global model
-    global device
-    global cudaIdx
-    cudaIdx = gpu
-    try:
-        if whisperFound == "FSTR":
-            if(modelSize == "large"):
-                modelPath = "whisper-large-ct2/"
-            else:
-                modelPath = "whisper-medium-ct2/"
-            print("LOADING: "+modelPath+" GPU: "+gpu+" BS: "+str(beam_size))
-            compute_type="float16"# float16 int8_float16 int8
-            model = WhisperModel(modelPath, device=device,device_index=int(gpu), compute_type=compute_type)
-        elif whisperFound == "STD":
-            if(modelSize == None):
-                modelSize="medium"#"tiny"#"medium" #"large"
-            print("LOADING: "+modelSize+" GPU:"+gpu+" BS: "+str(beam_size))
-            model = whisper.load_model(modelSize,device=torch.device("cuda:"+gpu)) #May be "cpu"
-        print("LOADED")
-    except:
-        print("Can't load Whisper model: "+modelSize)
-        sys.exit(-1)
-
-def getDuration(aLog:str):
-    with open(aLog) as f:
-        lines = f.readlines()
-        for line in lines:
-            if(re.match(r"^ *Duration: [0-9][0-9]:[0-9][0-9]:[0-9][0-9][.][0-9][0-9], .*$", line, re.IGNORECASE)):
-                duration = re.sub(r"(^ *Duration: *|[,.].*$)", "", line, 2, re.IGNORECASE)
-                return sum(x * int(t) for x, t in zip([3600, 60, 1], duration.split(":")))
-
-def formatTimeStamp(aT=0):
-    aH = int(aT/3600)
-    aM = int((aT%3600)/60)
-    aS = (aT%60)
-    return "%02d:%02d:%06.3f" % (aH,aM,aS)
-
 def getPrompt(lng:str):
-    if(lng == "en"):
-        aOk=""
-        return "Whisper, Ok. "\
-            +"A pertinent sentence for your purpose in your language. "\
-            +"Ok, Whisper. Whisper, Ok. Ok, Whisper. Whisper, Ok. "\
-            +"Please find here, an unlikely ordinary sentence. "\
-            +"This is to avoid a repetition to be deleted. "\
-            +"Ok, Whisper. "
-    
-    if(lng == "fr"):
-        return "Whisper, Ok. "\
-            +"Une phrase pertinente pour votre propos dans votre langue. "\
-            +"Ok, Whisper. Whisper, Ok. Ok, Whisper. Whisper, Ok. "\
-            +"Merci de trouver ci-joint, une phrase ordinaire improbable. "\
-            +"Pour éviter une répétition à être supprimée. "\
-            +"Ok, Whisper. "
-    
-    if(lng == "uk"):
-        return "Whisper, Ok. "\
-            +"Доречне речення вашою мовою для вашої мети. "\
-            +"Ok, Whisper. Whisper, Ok. Ok, Whisper. Whisper, Ok. "\
-            +"Будь ласка, знайдіть тут навряд чи звичайне речення. "\
-            +"Це зроблено для того, щоб уникнути повторення, яке потрібно видалити. "\
-            +"Ok, Whisper. "
-    
-    if(lng == "hi"):
-        return "विस्पर, ओके. "\
-            +"आपकी भाषा में आपके उद्देश्य के लिए एक प्रासंगिक वाक्य। "\
-            +"ओके, विस्पर. विस्पर, ओके. ओके, विस्पर. विस्पर, ओके. "\
-            +"कृपया यहां खोजें, एक असंभावित सामान्य वाक्य। "\
-            +"यह हटाए जाने की पुनरावृत्ति से बचने के लिए है। "\
-            +"ओके, विस्पर. "
-    
-    #Not Already defined?
-    return ""
 
+    return "The transcript is between a Veterinarian and client containing veterinary medical terminology"
+    
 
-def transcribePrompt(path: str,lng: str,prompt=None, key=None, lngInput=None,isMusic=False,addSRT=False):
+def transcribePrompt(path: str,lng: str,prompt=None,lngInput=None,isMusic=False,addSRT=False):
     """Whisper transcribe."""
 
     if(lngInput == None):
@@ -163,9 +74,10 @@ def transcribePrompt(path: str,lng: str,prompt=None, key=None, lngInput=None,isM
     print("LNG="+lng,flush=True)
     print("PROMPT="+prompt,flush=True)
     opts = dict(language=lng,initial_prompt=prompt)
-    return transcribeOpts(path, opts, key, lngInput,isMusic=isMusic,addSRT=addSRT)
+    return transcribeOpts(path, opts,lngInput,isMusic=isMusic,addSRT=addSRT)
 
-def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT=False):
+
+def transcribeOpts(path: str,opts: dict,lngInput=None,isMusic=False,addSRT=False):
     pathIn = path
     pathClean = path
     pathNoCut = path
@@ -184,20 +96,6 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
         pathIn = pathClean = pathWAV
     except:
          print("Warning: can't convert to WAV")
-
-    if(useSpleeter):
-        startTime = time.time()
-        try:
-            spleeterDir=pathIn+".spleeter"
-            if(not os.path.exists(spleeterDir)):
-                os.mkdir(spleeterDir)
-            pathSpleeter=spleeterDir+"/"+os.path.splitext(os.path.basename(pathIn))[0]+"/vocals.wav"
-            separator.separate_to_file(pathIn, spleeterDir)
-            print("T=",(time.time()-startTime))
-            print("PATH="+pathSpleeter,flush=True)
-            pathNoCut = pathIn = pathSpleeter
-        except:
-             print("Warning: can't split vocals")
     
     if(useDemucs):
         startTime = time.time()
@@ -231,7 +129,7 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
         print("DURATION="+str(duration))
     except:
          print("Warning: can't filter blanks")
-    
+
     if(not isMusic and useSileroVAD):
         startTime = time.time()
         try:
@@ -252,7 +150,7 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
         mode=0
     
     startTime = time.time()
-    result = transcribeMARK(pathIn, opts, key, mode=mode,lngInput=lngInput,isMusic=isMusic)
+    result = transcribeMARK(pathIn, opts, mode=mode,lngInput=lngInput,isMusic=isMusic)
     
     if len(result["text"]) <= 0:
         result["text"] = "--"
@@ -272,7 +170,7 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
     
     return result["text"]
 
-def transcribeMARK(path: str,opts: dict, key, mode = 1,lngInput=None,aLast=None,isMusic=False):
+def transcribeMARK(path: str,opts: dict,mode = 1,lngInput=None,aLast=None,isMusic=False):
     pathIn = path
     
     lng = opts["language"]
@@ -336,37 +234,12 @@ def transcribeMARK(path: str,opts: dict, key, mode = 1,lngInput=None,aLast=None,
         if beam_size > 1:
             transcribe_options = dict(beam_size=beam_size,**opts)
         
-        openai.api_key = key
-        audio_file = open(pathIn, "rb");
-        transcript = openai.Audio.transcribe("whisper-1", audio_file, **transcribe_options)
+        import openai
+        openai.api_key = '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'
+        audio_file= open(pathIn, "rb")
+        transcript = openai.Audio.transcribe("whisper-1", audio_file)
+        print(transcript)
 
-        # if whisperFound == "FSTR":
-        #     segments, info = model.transcribe(pathIn,**transcribe_options)
-        #     result = {}
-        #     result["text"] = ""
-        #     if(mode == 3):
-        #         aSegCount = 0
-        #         for segment in segments:
-        #             aSegCount += 1
-        #             result["text"] += "\n"+str(aSegCount)+"\n"+formatTimeStamp(segment.start)+" --> "+formatTimeStamp(segment.end)+"\n"+segment.text.strip()+"\n"
-        #     else:
-        #         for segment in segments:
-        #             result["text"] += segment.text
-        # else:
-        #     transcribe_options = dict(task="transcribe", **transcribe_options)
-        #     result = model.transcribe(pathIn,**transcribe_options)
-        #     if(mode == 3):
-        #         p = Path(pathIn)
-        #         writer = WriteSRT(p.parent)
-        #         writer(result, pathIn)
-        #         audio_basename = os.path.basename(pathIn)
-        #         audio_basename = os.path.splitext(audio_basename)[0]
-        #         output_path = os.path.join(
-        #             p.parent, audio_basename + ".srt"
-        #             )
-        #         with open(output_path) as f:
-        #             result["text"] = f.read()
-        
         print("T=",(time.time()-startTime))
         print("TRANS="+result["text"],flush=True)
     except Exception as e: 
@@ -423,3 +296,8 @@ def transcribeMARK(path: str,opts: dict, key, mode = 1,lngInput=None,aLast=None,
         
         return transcribeMARK(path, opts, mode=0,lngInput=lngInput,aLast=aCleaned)
 
+
+lng="en"
+prompt= "The transcript is a conversation between a veterinarian and client containing Veterinarian terminology"
+path = "data/Dobby_raw.mp3"
+transcribePrompt(path=path, lng=lng, prompt=prompt)

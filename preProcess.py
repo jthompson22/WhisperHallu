@@ -124,7 +124,7 @@ def removeSilencePreProcess(path: str):
         pathSILCUT = remove_base(path) +"_slience-loudnorm_"+".wav"
         aCmd = "ffmpeg -y -i \""+path+"\" -af \"silenceremove=start_periods=1:stop_periods=-1:start_threshold=-50dB:stop_threshold=-50dB:start_silence=0.2:stop_silence=0.2, loudnorm\" "+ " -c:a pcm_s16le -ar "+str(SAMPLING_RATE)+" \""+pathSILCUT+"\" > \""+pathSILCUT+".log\" 2>&1"
         print("CMD: "+aCmd)
-        os.system(aCmd)
+        run_command_and_check(aCmd)
         print("T= ",(time.time()-startTime))
         print("PATH= "+pathSILCUT,flush=True)
         duration = getDuration(pathSILCUT+".log")
@@ -156,7 +156,7 @@ def useCompressor(path):
         pathCPS = remove_wav_extension(path)+"_compressed_"+".wav"
         aCmd = "ffmpeg -y -i \""+path+"\" -af \"speechnorm=e=50:r=0.0005:l=1\" "+ " -c:a pcm_s16le -ar "+str(SAMPLING_RATE)+" \""+pathCPS+"\" > \""+pathCPS+".log\" 2>&1"
         print("CMD: "+aCmd)
-        os.system(aCmd)
+        run_command_and_check(aCmd)
         print("T=",(time.time()-startTime))
         print("PATH="+pathCPS,flush=True)
         return pathCPS
@@ -172,5 +172,6 @@ def runPreProcessAlgorithim(path: str, device: str, options: dict):
     pathIn = removeSilencePreProcess(pathIn)
     pathIn = sileroVADPreProcess(pathIn)
     print("FINALPATH= "+ pathIn, flush=True)
+    return pathIn
 
 

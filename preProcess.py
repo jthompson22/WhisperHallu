@@ -51,9 +51,10 @@ def remove_wav_extension(path):
     if path.endswith('.wav'):
         return path[:-4]
     return path
-def remove_mp3_extension(path):
-    if path.endswith('.mp3'):
-        return path[:-4]
+def remove_mp3_extension(path: str) -> str:
+    base, ext = os.path.splitext(path)
+    if ext.lower() == '.mp3':
+        return base
     return path
 
     aH = int(aT/3600)
@@ -68,20 +69,20 @@ def getDuration(aLog:str):
                 duration = re.sub(r"(^ *Duration: *|[,.].*$)", "", line, 2, re.IGNORECASE)
                 return sum(x * int(t) for x, t in zip([3600, 60, 1], duration.split(":")))
 #PROCESSING
-def wavPreProcess(path: str):
+def wavPreProcess(path: str) -> str:
     try:
         pathIn = path
         print("Converting To WAV:")
         initTime = time.time()
-        pathWAV = remove_mp3_extension(pathIn) +"_wav-converted_"+".wav"
-        aCmd = "ffmpeg -y -i \""+pathIn+"\" "+ " -c:a pcm_s16le -ar "+str(SAMPLING_RATE)+" \""+pathWAV+"\" > \""+pathWAV+".log\" 2>&1"
-        print("CMD: "+ aCmd)
+        pathWAV = remove_mp3_extension(pathIn) + "_wav-converted_" + ".wav"
+        aCmd = f"ffmpeg -y -i \"{pathIn}\" -c:a pcm_s16le -ar {SAMPLING_RATE} \"{pathWAV}\" > \"{pathWAV}.log\" 2>&1"
+        print("CMD:", aCmd)
         os.system(aCmd)
-        print("Time= ",(time.time()- initTime))
-        print("PATH= "+pathWAV,flush=True)
+        print("Time=", (time.time() - initTime))
+        print("PATH=", pathWAV, flush=True)
         return pathWAV
-    except:
-         print("Warning: can't convert to WAV")
+    except Exception as e:
+        print(f"Warning: can't convert to WAV. Error: {e}"))
 
 def demucsPreProcess(path: str, device: str):
     try:

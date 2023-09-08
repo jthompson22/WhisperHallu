@@ -30,7 +30,7 @@ def demucs_audio(pathIn: str,
             audio = audio[None]
 
     if device is None:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = "cpu"
     print("Demucs using device: "+device)
     result = apply_model(model, audio, device=device, split=True, overlap=.25)
     if device != 'cpu':

@@ -210,7 +210,7 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
         #aCmd = "python -m demucs --two-stems=vocals -d "+device+":"+cudaIdx+" --out "+demucsDir+" "+pathIn
         #print("CMD: "+aCmd)
         #os.system(aCmd)
-        demucs_audio(pathIn=pathIn,model=modelDemucs,device="cuda:"+cudaIdx,pathVocals=pathDemucs,pathOther=pathIn+".other.wav")
+        demucs_audio(pathIn=pathIn,model=modelDemucs,device="cpu"+cudaIdx,pathVocals=pathDemucs,pathOther=pathIn+".other.wav")
         print("T=",(time.time()-startTime))
         print("PATH="+pathDemucs,flush=True)
         pathNoCut = pathIn = pathDemucs

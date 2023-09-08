@@ -54,9 +54,7 @@ def remove_wav_extension(path):
     return path
 def remove_base(path: str) -> str:
     base, ext = os.path.splitext(path)
-    if ext.lower() == '.mp3':
-        return base
-    return path
+    return base
 
     aH = int(aT/3600)
     aM = int((aT%3600)/60)
@@ -87,6 +85,7 @@ def wavPreProcess(path: str) -> str:
         print("Converting To WAV:")
         initTime = time.time()
         pathWAV = remove_base(pathIn) + "_wav-converted_" + ".wav"
+        print("Wave Path: ", pathWAV)
         aCmd = f"ffmpeg -y -i \"{pathIn}\" -c:a pcm_s16le -ar {SAMPLING_RATE} \"{pathWAV}\" > \"{pathWAV}.log\" 2>&1"
         print("CMD:", aCmd)
         run_command_and_check(aCmd)

@@ -97,6 +97,10 @@ def wavPreProcess(path: str) -> str:
 
 def demucsPreProcess(path: str, device: str):
     try:
+        from demucsWrapper import load_demucs_model
+        from demucsWrapper import demucs_audio
+        print("Using Demucs")
+        modelDemucs = load_demucs_model()
         startTime = time.time()
         pathDemucs=remove_base(path) +"demucs-vocals_.wav" 
         pathRemoved= "RemovedNoise/"

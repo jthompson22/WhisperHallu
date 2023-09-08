@@ -96,7 +96,7 @@ def demucsPreProcess(path: str, device: str):
             localDevice = None
         else:
             localDevice = "cuda:0"
-        demucs_audio(pathIn=pathIn,model=modelDemucs,device=localDevice,pathVocals=pathDemucs,pathOther=pathRemoved+"other.wav")
+        demucs_audio(pathIn=path,model=modelDemucs,device=localDevice,pathVocals=pathDemucs,pathOther=pathRemoved+"other.wav")
         print("T= ",(time.time()-startTime))
         print("PATH= "+pathDemucs,flush=True)
         return pathDemucs

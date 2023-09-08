@@ -81,12 +81,11 @@ def run_command_and_check(cmd):
 #PROCESSING
 def wavPreProcess(path: str) -> str:
     try:
-        pathIn = path
         print("Converting To WAV:")
         initTime = time.time()
-        pathWAV = remove_base(pathIn) + "_wav-converted_" + ".wav"
+        pathWAV = remove_base(path) + "_wav-converted_" + ".wav"
         print("Wave Path: ", pathWAV)
-        aCmd = f"ffmpeg -y -i \"{pathIn}\" -c:a pcm_s16le -ar {SAMPLING_RATE} \"{pathWAV}\" > \"{pathWAV}.log\" 2>&1"
+        aCmd = f"ffmpeg -y -i \"{path}\" -c:a pcm_s16le -ar {SAMPLING_RATE} \"{pathWAV}\" > \"{pathWAV}.log\" 2>&1"
         print("CMD:", aCmd)
         run_command_and_check(aCmd)
         print("Time=", (time.time() - initTime))

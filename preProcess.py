@@ -37,7 +37,7 @@ if(useDemucs):
     print("Using Demucs")
     modelDemucs = load_demucs_model()
 
-useCompressor=True
+#useCompressor=True
 
 
 SAMPLING_RATE = 16000
@@ -51,7 +51,7 @@ def remove_wav_extension(path):
     if path.endswith('.wav'):
         return path[:-4]
     return path
-def remove_mp3_extension(path: str) -> str:
+def remove_base(path: str) -> str:
     base, ext = os.path.splitext(path)
     if ext.lower() == '.mp3':
         return base
@@ -74,7 +74,7 @@ def wavPreProcess(path: str) -> str:
         pathIn = path
         print("Converting To WAV:")
         initTime = time.time()
-        pathWAV = remove_mp3_extension(pathIn) + "_wav-converted_" + ".wav"
+        pathWAV = remove_base(pathIn) + "_wav-converted_" + ".wav"
         aCmd = f"ffmpeg -y -i \"{pathIn}\" -c:a pcm_s16le -ar {SAMPLING_RATE} \"{pathWAV}\" > \"{pathWAV}.log\" 2>&1"
         print("CMD:", aCmd)
         os.system(aCmd)
@@ -87,9 +87,9 @@ def wavPreProcess(path: str) -> str:
 
 def demucsPreProcess(path: str, device: str):
     try:
-        pathIn = remove_wav_extension(path)
+        pathIn = path
         startTime = time.time()
-        pathDemucs=pathIn+"._demucs-vocals_.wav" 
+        pathDemucs=remove_base(path) +"._demucs-vocals_.wav" 
         pathRemoved= "RemovedNoise/"
         if(not os.path.exists("RemovedNoise")):
                 os.mkdir("RemovedNoise")
@@ -147,6 +147,7 @@ def useCompressor(path):
         return pathCPS
     except:
         print("Warning: can't compress")
+        sys.exit(-1)
 
 def runPreProcessAlgorithim(path: str, device: str, options: dict):
     pathIn = path

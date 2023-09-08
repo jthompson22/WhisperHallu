@@ -84,7 +84,7 @@ def wavPreProcess(path: str) -> str:
         print("Converting To WAV:")
         initTime = time.time()
         pathWAV = remove_base(path) + "_wav-converted_" + ".wav"
-        print("Wave Path: ", pathWAV)
+        print("Wave Path: ", pathWAV, flush=True)
         aCmd = f"ffmpeg -y -i \"{path}\" -c:a pcm_s16le -ar {SAMPLING_RATE} \"{pathWAV}\" > \"{pathWAV}.log\" 2>&1"
         print("CMD:", aCmd)
         run_command_and_check(aCmd)

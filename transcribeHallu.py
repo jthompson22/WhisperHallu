@@ -216,10 +216,10 @@ def transcribeOpts(path: str,opts: dict, key, lngInput=None,isMusic=False,addSRT
         #print("CMD: "+aCmd)
         #os.system(aCmd)
         if(device == "cpu"):
-            device = None
+            localDevice = None
         else:
-            device = "cuda:"+cudaIdx
-        demucs_audio(pathIn=pathIn,model=modelDemucs,device=device,pathVocals=pathDemucs,pathOther=pathIn+".other.wav")
+            localDevice = "cuda:"+str(cudaIdx)
+        demucs_audio(pathIn=pathIn,model=modelDemucs,device=localDevice,pathVocals=pathDemucs,pathOther=pathIn+".other.wav")
         print("T=",(time.time()-startTime))
         print("PATH="+pathDemucs,flush=True)
         pathNoCut = pathIn = pathDemucs
@@ -350,7 +350,7 @@ def transcribeMARK(path: str,opts: dict, key, mode = 1,lngInput=None,aLast=None,
         openai.api_key = key
         audio_file = open(pathIn, "rb");
         transcript = openai.Audio.transcribe("whisper-1", audio_file, **transcribe_options)
-
+        print(transcript)
         # if whisperFound == "FSTR":
         #     segments, info = model.transcribe(pathIn,**transcribe_options)
         #     result = {}

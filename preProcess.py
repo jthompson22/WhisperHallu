@@ -136,7 +136,7 @@ def removeSilencePreProcess(path: str):
 def sileroVADPreProcess(path: str):
     startTime = time.time()
     try:
-        pathVAD = remove_wav_extension(path) +"_silero_.wav"
+        pathVAD = remove_base(path) +"_silero_.wav"
         wav = read_audio(path, sampling_rate=SAMPLING_RATE)
         #https://github.com/snakers4/silero-vad/blob/master/utils_vad.py#L161
         speech_timestamps = get_speech_timestamps(wav, modelVAD,threshold=0.5,min_silence_duration_ms=500, sampling_rate=SAMPLING_RATE)
@@ -168,7 +168,7 @@ def runPreProcessAlgorithim(path: str, device: str, options: dict):
     pathIn = wavPreProcess(pathIn)
     pathIn = demucsPreProcess(pathIn, device)
     pathIn = removeSilencePreProcess(pathIn)
-    #pathIn = sileroVADPreProcess(pathIn)
-    #print("FINALPATH= "+ pathIn, flush=True)
+    pathIn = sileroVADPreProcess(pathIn)
+    print("FINALPATH= "+ pathIn, flush=True)
 
 
